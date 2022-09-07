@@ -1,42 +1,42 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { Coffe } from 'src/database/models';
 import { CreateCoffeDto } from './dto/create-coffe.dto';
-import { Coffe } from './entities/coffe.entity';
+import { UpdateCoffeDto } from './dto/update-coffe.dto';
 
 @Injectable()
 export class CoffesService {
-    private coffes: Coffe[] = [
-        {
-            id: 1,
-            name: "Latte",
-            brand: "brand 1",
-            flavors: ["a", "b"]
-        }
-    ];
+    constructor(@InjectModel(Coffe)
+    private coffeModel: typeof Coffe,) {}
 
     findAll() {
-        return this.coffes;  
+        return this.coffeModel.findAll(); 
     }
 
-    findOne(id: string) {
-        return this.coffes.find(item => item.id === +id);
+    async findOne(id: string) {
+        const coffe = await this.coffeModel.findByPk(id);
+        if (!coffe) {
+            throw new NotFoundException(`Coffe #${id} not found`);
+        }
+        return coffe;
     }
 
-    create(coffeObject) {
-        this.coffes.push(coffeObject);
+    async create(createCoffeDto: CreateCoffeDto) {
+        
+        await this.coffeModel.create({
+            ...createCoffeDto,
+        });
     }
 
-    update(id: string, coffeObject) {
-        const existingCoffe = this.findOne(id);
-        if (existingCoffe) {
-            // update ))
+    async update(id: string, updateCoffeDto: UpdateCoffeDto) {
+        const coffe = await this.coffeModel.update(updateCoffeDto, {where: {id}})
+        if (!coffe) {
+            throw new NotFoundException(`Coffe #${id} not found`);
         }
     }
 
-    delete(id: string) {
-        const coffeIndex = this.coffes.findIndex(item => item.id === +id);
-        if (coffeIndex >= 0) {
-            this.coffes.splice(coffeIndex, 1);
-        }
+    async remove(id: string) {
+        return this.coffeModel.destroy({where :{id}})
     }
 
 }

@@ -1,22 +1,23 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CoffeData } from './classes/coffe-data.class';
 import { CoffesService } from './coffes.service';
 import { CreateCoffeDto } from './dto/create-coffe.dto';
 import { UpdateCoffeDto } from './dto/update-coffe.dto';
-import { Coffe } from './entities/coffe.entity';
 
-
-
+@ApiTags('coffes methods')
+@ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not Found' })
 @Controller('coffes')
 export class CoffesController {
     constructor(private readonly coffesService: CoffesService) {}
 
     @Get()
-    findAll(): Coffe[] {
+    async findAll(): Promise<CoffeData[]> {
         return this.coffesService.findAll();
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string): Coffe {
+    async findOne(@Param('id') id: string): Promise<CoffeData> {
         return this.coffesService.findOne(id);
     }
 
@@ -28,7 +29,7 @@ export class CoffesController {
 
     @Delete(':id')
     delete(@Param('id') id: string) {
-        return this.coffesService.delete(id);
+        return this.coffesService.remove(id);
     }
 
     @Patch(':id')
