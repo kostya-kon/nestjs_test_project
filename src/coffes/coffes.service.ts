@@ -13,7 +13,7 @@ export class CoffesService {
         return this.coffeModel.findAll(); 
     }
 
-    async findOne(id: string) {
+    async findOne(id: number) {
         const coffe = await this.coffeModel.findByPk(id);
         if (!coffe) {
             throw new NotFoundException(`Coffe #${id} not found`);
